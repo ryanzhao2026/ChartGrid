@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-18T04:19:37+0000",
+  "generated_at": "2026-11-18T04:29:38+0000",
   "source": "yfinance (continuous futures)",
   "requested_days": 500,
   "count": 46,
@@ -13,7 +13,7 @@
       "file": "ES.json",
       "status": "ok",
       "bars": 413,
-      "last": 7375.25,
+      "last": 7382.75,
       "lastDate": "2026-11-17"
     },
     {
@@ -23,7 +23,7 @@
       "file": "NQ.json",
       "status": "ok",
       "bars": 413,
-      "last": 27200.0,
+      "last": 27269.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -33,7 +33,7 @@
       "file": "YM.json",
       "status": "ok",
       "bars": 413,
-      "last": 50870.0,
+      "last": 50878.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -43,7 +43,7 @@
       "file": "RTY.json",
       "status": "ok",
       "bars": 413,
-      "last": 2711.3,
+      "last": 2712.6001,
       "lastDate": "2026-11-17"
     },
     {
@@ -53,7 +53,7 @@
       "file": "NKD.json",
       "status": "ok",
       "bars": 413,
-      "last": 59130.0,
+      "last": 59250.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -83,7 +83,7 @@
       "file": "ZT.json",
       "status": "ok",
       "bars": 413,
-      "last": 101.9258,
+      "last": 101.9141,
       "lastDate": "2026-11-17"
     },
     {
@@ -93,7 +93,7 @@
       "file": "ZF.json",
       "status": "ok",
       "bars": 413,
-      "last": 104.2109,
+      "last": 104.1875,
       "lastDate": "2026-11-17"
     },
     {
@@ -103,7 +103,7 @@
       "file": "ZN.json",
       "status": "ok",
       "bars": 413,
-      "last": 105.7031,
+      "last": 105.6719,
       "lastDate": "2026-11-17"
     },
     {
@@ -113,7 +113,7 @@
       "file": "TN.json",
       "status": "ok",
       "bars": 413,
-      "last": 106.9219,
+      "last": 106.875,
       "lastDate": "2026-11-17"
     },
     {
@@ -123,7 +123,7 @@
       "file": "ZB.json",
       "status": "ok",
       "bars": 413,
-      "last": 105.875,
+      "last": 105.8438,
       "lastDate": "2026-11-17"
     },
     {
@@ -133,7 +133,7 @@
       "file": "UB.json",
       "status": "ok",
       "bars": 413,
-      "last": 107.0625,
+      "last": 107.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -153,7 +153,7 @@
       "file": "CL.json",
       "status": "ok",
       "bars": 413,
-      "last": 84.96,
+      "last": 85.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -163,7 +163,7 @@
       "file": "BZ.json",
       "status": "ok",
       "bars": 413,
-      "last": 92.64,
+      "last": 92.71,
       "lastDate": "2026-11-17"
     },
     {
@@ -173,7 +173,7 @@
       "file": "NG.json",
       "status": "ok",
       "bars": 413,
-      "last": 3.174,
+      "last": 3.173,
       "lastDate": "2026-11-17"
     },
     {
@@ -183,7 +183,7 @@
       "file": "RB.json",
       "status": "ok",
       "bars": 413,
-      "last": 2.4805,
+      "last": 2.4828,
       "lastDate": "2026-11-17"
     },
     {
@@ -193,7 +193,7 @@
       "file": "HO.json",
       "status": "ok",
       "bars": 413,
-      "last": 3.9496,
+      "last": 3.9515,
       "lastDate": "2026-11-17"
     },
     {
@@ -203,7 +203,7 @@
       "file": "GC.json",
       "status": "ok",
       "bars": 413,
-      "last": 3783.8,
+      "last": 3789.8999,
       "lastDate": "2026-11-17"
     },
     {
@@ -213,7 +213,7 @@
       "file": "SI.json",
       "status": "ok",
       "bars": 413,
-      "last": 45.8,
+      "last": 45.91,
       "lastDate": "2026-11-17"
     },
     {
@@ -223,7 +223,7 @@
       "file": "PL.json",
       "status": "ok",
       "bars": 413,
-      "last": 1402.3,
+      "last": 1403.1,
       "lastDate": "2026-11-17"
     },
     {
@@ -233,7 +233,7 @@
       "file": "PA.json",
       "status": "ok",
       "bars": 412,
-      "last": 948.5,
+      "last": 950.5,
       "lastDate": "2026-11-17"
     },
     {
@@ -243,7 +243,7 @@
       "file": "HG.json",
       "status": "ok",
       "bars": 413,
-      "last": 5.885,
+      "last": 5.889,
       "lastDate": "2026-11-17"
     },
     {
@@ -253,7 +253,7 @@
       "file": "ZS.json",
       "status": "ok",
       "bars": 412,
-      "last": 1225.75,
+      "last": 1226.0,
       "lastDate": "2026-11-17"
     },
     {
@@ -263,7 +263,7 @@
       "file": "ZM.json",
       "status": "ok",
       "bars": 412,
-      "last": 335.8,
+      "last": 335.7,
       "lastDate": "2026-11-17"
     },
     {
@@ -273,7 +273,7 @@
       "file": "ZL.json",
       "status": "ok",
       "bars": 412,
-      "last": 61.69,
+      "last": 61.76,
       "lastDate": "2026-11-17"
     },
     {
@@ -283,7 +283,7 @@
       "file": "ZC.json",
       "status": "ok",
       "bars": 412,
-      "last": 445.0,
+      "last": 445.25,
       "lastDate": "2026-11-17"
     },
     {
@@ -293,7 +293,7 @@
       "file": "ZW.json",
       "status": "ok",
       "bars": 412,
-      "last": 605.75,
+      "last": 606.5,
       "lastDate": "2026-11-17"
     },
     {
@@ -393,7 +393,7 @@
       "file": "6E.json",
       "status": "ok",
       "bars": 413,
-      "last": 1.0999,
+      "last": 1.1,
       "lastDate": "2026-11-17"
     },
     {
@@ -413,7 +413,7 @@
       "file": "6B.json",
       "status": "ok",
       "bars": 413,
-      "last": 1.3196,
+      "last": 1.3195,
       "lastDate": "2026-11-17"
     },
     {
@@ -423,7 +423,7 @@
       "file": "6C.json",
       "status": "ok",
       "bars": 413,
-      "last": 0.6997,
+      "last": 0.6996,
       "lastDate": "2026-11-17"
     },
     {
@@ -433,7 +433,7 @@
       "file": "6S.json",
       "status": "ok",
       "bars": 413,
-      "last": 1.1932,
+      "last": 1.1926,
       "lastDate": "2026-11-17"
     },
     {
@@ -443,7 +443,7 @@
       "file": "6A.json",
       "status": "ok",
       "bars": 413,
-      "last": 0.6719,
+      "last": 0.672,
       "lastDate": "2026-11-17"
     },
     {
@@ -453,7 +453,7 @@
       "file": "BTC.json",
       "status": "ok",
       "bars": 413,
-      "last": 64365.0,
+      "last": 64540.0,
       "lastDate": "2026-11-17"
     }
   ]
