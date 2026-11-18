@@ -10,6 +10,7 @@
  *   p2[i] = p2[i-1] + a*(p1[i] - p2[i-1])      <- 输出 p2
  * 另一口径 SMA 的 SMA：p1 = SMA(x,N)，p2 = SMA(p1,N)
  * 两者 DC 增益均为 1，只改变滞后与平滑度。
+ * 其余可选口径见 twoPoleMA() 的 switch：SMA/EMA/WMA/HMA/DEMA/TEMA/ZLEMA/KAMA/JMA。
  *
  * 周期
  * ----
@@ -88,9 +89,153 @@ function smaOfSma(arr, n) {
   return out;
 }
 
+/** 加权滑动平均：权重 N..1 线性递减，末端权重最大。 */
+function wma(values, n) {
+  const len = values.length;
+  const N = Math.max(1, Math.floor(n));
+  const out = new Float64Array(len);
+  out.fill(NaN);
+  const denom = (N * (N + 1)) / 2;
+  for (let i = N - 1; i < len; i++) {
+    let sum = 0;
+    let ok = true;
+    for (let j = 0; j < N; j++) {
+      const v = values[i - j];
+      if (Number.isNaN(v)) { ok = false; break; }
+      sum += v * (N - j);
+    }
+    if (ok) out[i] = sum / denom;
+  }
+  return out;
+}
+
+/** Hull MA：WMA(2*WMA(N/2) - WMA(N), sqrt(N))，滞后小但转弯处会略过冲。 */
+function hma(values, n) {
+  const len = values.length;
+  const N = Math.max(2, Math.floor(n));
+  const half = Math.max(1, Math.floor(N / 2));
+  const sq = Math.max(1, Math.round(Math.sqrt(N)));
+  const w1 = wma(values, half);
+  const w2 = wma(values, N);
+  const raw = new Float64Array(len);
+  raw.fill(NaN);
+  for (let i = 0; i < len; i++) {
+    if (!Number.isNaN(w1[i]) && !Number.isNaN(w2[i])) raw[i] = 2 * w1[i] - w2[i];
+  }
+  return wma(raw, sq);
+}
+
+/** 双重 EMA：2*EMA - EMA(EMA)，比单 EMA 滞后更小。 */
+function dema(values, n) {
+  const e1 = ema(values, n);
+  const e2 = ema(e1, n);
+  const out = new Float64Array(values.length);
+  for (let i = 0; i < values.length; i++) out[i] = 2 * e1[i] - e2[i];
+  return out;
+}
+
+/** 三重 EMA：3*EMA - 3*EMA(EMA) + EMA(EMA(EMA))。 */
+function tema(values, n) {
+  const e1 = ema(values, n);
+  const e2 = ema(e1, n);
+  const e3 = ema(e2, n);
+  const out = new Float64Array(values.length);
+  for (let i = 0; i < values.length; i++) out[i] = 3 * e1[i] - 3 * e2[i] + e3[i];
+  return out;
+}
+
+/** 零滞后 EMA：先做去滞后变换 2*x[i]-x[i-lag]，再做 EMA。lag=(N-1)/2。 */
+function zlema(values, n) {
+  const len = values.length;
+  const N = Math.max(1, Math.floor(n));
+  const lag = Math.max(1, Math.floor((N - 1) / 2));
+  const de = new Float64Array(len);
+  for (let i = 0; i < len; i++) {
+    de[i] = i >= lag ? values[i] + (values[i] - values[i - lag]) : values[i];
+  }
+  return ema(de, N);
+}
+
+/**
+ * Kaufman 自适应均线：用效率比率 ER 调节平滑系数。
+ * ER 高（趋势干净）时贴近价格，ER 低（震荡）时重平滑。
+ */
+function kama(values, n, fast, slow) {
+  const len = values.length;
+  const N = Math.max(2, Math.floor(n));
+  const fN = Math.max(1, Math.floor(fast || 2));
+  const sN = Math.max(2, Math.floor(slow || 30));
+  const fastSC = 2 / (fN + 1);
+  const slowSC = 2 / (sN + 1);
+  const out = new Float64Array(len);
+  out.fill(NaN);
+  if (len < N + 1) return out;
+  let prev = values[N - 1];
+  out[N - 1] = prev;
+  for (let i = N; i < len; i++) {
+    const change = Math.abs(values[i] - values[i - N]);
+    let vol = 0;
+    for (let j = i - N + 1; j <= i; j++) vol += Math.abs(values[j] - values[j - 1]);
+    const er = vol === 0 ? 0 : change / vol;
+    const sc = Math.pow(er * (fastSC - slowSC) + slowSC, 2);
+    prev += sc * (values[i] - prev);
+    out[i] = prev;
+  }
+  return out;
+}
+
+/**
+ * Jurik MA（JMA）的公开近似实现。
+ * 真正的 JMA 是 Jurik Research 的专有/专利算法，这里用的是社区通用的近似版：
+ * 三级递归平滑 + 相位补偿。参数 phase=0、power=2 为常见默认。
+ */
+function jma(values, n, phase, power) {
+  const len = values.length;
+  const out = new Float64Array(len);
+  if (!len) return out;
+  const N = Math.max(2, Math.floor(n));
+  const ph = Number.isFinite(phase) ? phase : 0;
+  const pw = Math.max(1, Number.isFinite(power) ? power : 2);
+  const phaseRatio = ph < -100 ? 0.5 : ph > 100 ? 2.5 : ph / 100 + 1.5;
+  const beta = (0.45 * (N - 1)) / (0.45 * (N - 1) + 2);
+  const alpha = Math.pow(beta, pw);
+  const a1 = 1 - alpha;
+  let e0 = values[0];
+  let e1 = 0;
+  let e2 = 0;
+  let prev = values[0];
+  out[0] = prev;
+  for (let i = 1; i < len; i++) {
+    const src = values[i];
+    e0 = a1 * src + alpha * e0;
+    e1 = (src - e0) * (1 - beta) + beta * e1;
+    e2 = (e0 + phaseRatio * e1 - prev) * a1 * a1 + alpha * alpha * e2;
+    prev = e2 + prev;
+    out[i] = prev;
+  }
+  return out;
+}
+
+/**
+ * 均线口径分发。
+ * 默认 cascade = 级联 EMA（两极），保持原有行为；
+ * 其余口径按 method 名切换，均为同一份收盘价序列上的平滑。
+ */
 function twoPoleMA(values, period, method) {
-  if (method === 'smasma') return smaOfSma(values, period);
-  return cascadeEMA(values, period);
+  const N = Math.max(1, Math.floor(period));
+  switch (method) {
+    case 'smasma': return smaOfSma(values, N);
+    case 'sma': return sma(values, N);
+    case 'ema': return ema(values, N);
+    case 'wma': return wma(values, N);
+    case 'hma': return hma(values, N);
+    case 'dema': return dema(values, N);
+    case 'tema': return tema(values, N);
+    case 'zlema': return zlema(values, N);
+    case 'kama': return kama(values, N, 2, 30);
+    case 'jma': return jma(values, N, 0, 2);
+    default: return cascadeEMA(values, N);
+  }
 }
 
 /** 布林带：中轨 SMA，上下轨 ±k 倍总体标准差。 */
@@ -265,6 +410,12 @@ const PALETTE = {
 };
 
 const TF_LABEL = { D: '日线', W: '周线', M: '月线', Q: '季线' };
+
+const MA_LABEL = {
+  cascade: '级联EMA', smasma: 'SMA2', sma: 'SMA', ema: 'EMA',
+  wma: 'WMA', hma: 'HMA', dema: 'DEMA', tema: 'TEMA',
+  zlema: 'ZLEMA', kama: 'KAMA', jma: 'JMA',
+};
 
 /* ============================ 工具 ============================ */
 
@@ -801,11 +952,11 @@ function updateFooter(shown) {
   const total = (m.instruments || []).filter((i) => i.status === 'ok').length;
   const n = shown == null ? total : shown;
   const keys = ['ma', 'boll', 'macd', 'rsi', 'td'];
-  const names = ['两极均线', 'BOLL', 'MACD', 'RSI', 'TD9'];
+  const names = ['均线', 'BOLL', 'MACD', 'RSI', 'TD9'];
   const inds = names.filter((_, idx) => state.ind[keys[idx]]);
   f.textContent =
     n + ' / ' + total + ' 个品种 · ' + (TF_LABEL[state.timeframe] || '日线') +
-    ' · 均线 ' + state.period + (state.method === 'cascade' ? ' 级联EMA' : ' SMA2') +
+    ' · 均线 ' + state.period + ' ' + (MA_LABEL[state.method] || '级联EMA') +
     ' · 指标 ' + (inds.length ? inds.join('+') : '无') +
     ' · 显示 ' + state.bars + ' 根 · 数据 ' + (m.generated_at || '-');
 }
@@ -899,6 +1050,7 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     ema, sma, cascadeEMA, smaOfSma, twoPoleMA,
+    wma, hma, dema, tema, zlema, kama, jma,
     bollinger, macdCalc, rsiCalc, tdSetup, resample, decimalsFor,
   };
 }
