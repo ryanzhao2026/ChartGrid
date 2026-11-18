@@ -317,6 +317,7 @@ html, body {
 }
 
 .tip .boll { color: #9fb0c8; }
+.tip .td { color: #ffb74d; }
 
 /* 窄屏：卡片变单列，顶栏紧凑 */
 @media (max-width: 560px) {
