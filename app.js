@@ -102,6 +102,10 @@ function drawCard(card) {
   const d = rs.data;
   const total = d.c.length;
   if (!total) { drawEmpty(canvas, '无数据'); return; }
+
+  // 整体技术评估：在「整段聚合后序列」上算，不受显示根数与可见性影响。
+  // 放在画布操作之前，使隐藏分组（display:none）的卡片也能计入分组均分。
+  card._assess = assess(d, { period: state.period, method: state.method });
   const n = Math.min(state.bars, total);
   const s = total - n;
 
@@ -135,6 +139,9 @@ function drawCard(card) {
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.clientWidth;
   const cssH = canvas.clientHeight;
+  // 卡片处于隐藏分组时布局尺寸为 0：此时绘制会把画布压成 0×0 并留下空白。
+  // 直接跳过，等 applyFilter() 把容器显示出来后再重绘。
+  if (!cssW || !cssH) return;
   if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
@@ -398,9 +405,6 @@ function drawCard(card) {
     }
   }
 
-  // 整体技术评估：在「整段聚合后序列」上算，不受显示根数影响
-  card._assess = assess(d, { period: state.period, method: state.method });
-
   card._view = { n, s, dec, o, h, l, c, ma, bo, mc, rsi, td, macdView, rsiView, dates: d.dates };
 }
 
@@ -614,7 +618,10 @@ function applyFilter() {
     if (!el._inst) continue;
     const ok = state.activeGroup === 'All' || el._inst.group === state.activeGroup;
     el.style.display = ok ? '' : 'none';
-    if (ok) shown++;
+    if (!ok) continue;
+    shown++;
+    // 隐藏期间尺寸为 0、无法绘制；这里量到布局后补画一次。
+    if (el._data) drawCard(el);
   }
   updateFooter(shown);
 }
