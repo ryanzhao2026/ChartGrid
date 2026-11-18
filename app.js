@@ -22,6 +22,7 @@
  * BOLL(n=20,k=2)  mid=SMA(c,n), sd=总体标准差, up/low=mid±k*sd
  * MACD(12,26,9)   line=EMA12-EMA26, signal=EMA(line,9), hist=line-signal
  * RSI(14)         Wilder 平滑：avgGain/avgLoss，RSI=100-100/(1+RS)
+ * TD Setup 9      连续 9 根 close 高于/低于 close[4]（DeMark Magic 9）
  */
 
 /* ============================ 基础指标 ============================ */
@@ -155,6 +156,37 @@ function rsiCalc(closes, n) {
   return out;
 }
 
+/**
+ * TD Setup 9（俗称 Magic 9）
+ * -------------------------
+ * DeMark Setup 的经典简化口径，只用收盘价：
+ *   卖出结构 sell：close[i] > close[i-4] 连续计数
+ *   买入结构 buy ：close[i] < close[i-4] 连续计数
+ * 计数达到 9 为该结构的「完成」（setup completion），常作为趋势衰竭提示。
+ *
+ * 注意：严格版 DeMark 从第 9 根起要比较真实高/低点（perfected setup），
+ * 本实现为「close vs close[4]」通用简化版，也是多数软件默认的 Magic 9。
+ * 计数严格连续：条件不满足即归零，相等或反向都会打断。
+ */
+function tdSetup(closes) {
+  const len = closes.length;
+  const buy = new Int8Array(len);
+  const sell = new Int8Array(len);
+  let b = 0;
+  let s2 = 0;
+  for (let i = 0; i < len; i++) {
+    if (i >= 4) {
+      const prev = closes[i - 4];
+      if (closes[i] < prev) { b += 1; s2 = 0; }
+      else if (closes[i] > prev) { s2 += 1; b = 0; }
+      else { b = 0; s2 = 0; }
+    }
+    buy[i] = b > 127 ? 127 : b;
+    sell[i] = s2 > 127 ? 127 : s2;
+  }
+  return { buy, sell };
+}
+
 /* ============================ 周期聚合 ============================ */
 
 /** 把日线按周/月/季聚合成 OHLCV，口径与看盘软件一致。 */
@@ -208,7 +240,7 @@ const state = {
   method: 'cascade',
   bars: 130,
   timeframe: 'D',
-  ind: { ma: true, boll: false, macd: false, rsi: false },
+  ind: { ma: true, boll: false, macd: false, rsi: false, td: false },
   bollN: 20, bollK: 2,
   macdFast: 12, macdSlow: 26, macdSig: 9,
   rsiN: 14,
@@ -224,6 +256,8 @@ const PALETTE = {
   macdLine: '#3d7eff',
   macdSig: '#f0b90b',
   rsi: '#b388ff',
+  tdBuy: '#ffb74d',
+  tdSell: '#64b5f6',
   grid: 'rgba(255,255,255,0.055)',
   axis: 'rgba(255,255,255,0.42)',
   bg: '#131722',
@@ -304,6 +338,12 @@ function drawCard(card) {
   }
   let rsi = null;
   if (ind.rsi) rsi = tail(rsiCalc(d.c, state.rsiN), s, n);
+
+  let td = null;
+  if (ind.td) {
+    const t = tdSetup(d.c);
+    td = { buy: tail(t.buy, s, n), sell: tail(t.sell, s, n) };
+  }
 
   /* ---- 画布与布局 ---- */
   const dpr = window.devicePixelRatio || 1;
@@ -446,6 +486,35 @@ function drawCard(card) {
     ctx.stroke();
   }
 
+  /* ---- TD Setup 9 标记 ---- */
+  if (td) {
+    // 密度自适应：格子够宽才画 1-8 的过程计数，否则只画完成的 9
+    const showAll = cw >= 6.5;
+    ctx.textAlign = 'center';
+    ctx.font = '9px ui-monospace, SFMono-Regular, Menlo, monospace';
+    for (let i = 0; i < n; i++) {
+      const bv = td.buy[i];
+      const sv = td.sell[i];
+      if (!bv && !sv) continue;
+      const isBuy = bv > 0;
+      const cnt = isBuy ? bv : sv;
+      if (!showAll && cnt < 9) continue;
+      const cx = x(i);
+      const yy = isBuy ? yP(l[i]) + 9 : yP(h[i]) - 9;
+      if (cnt >= 9) {
+        ctx.beginPath();
+        ctx.arc(cx, yy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = isBuy ? 'rgba(255,183,77,0.18)' : 'rgba(100,181,246,0.18)';
+        ctx.fill();
+        ctx.strokeStyle = isBuy ? PALETTE.tdBuy : PALETTE.tdSell;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.fillStyle = isBuy ? PALETTE.tdBuy : PALETTE.tdSell;
+      ctx.fillText(String(cnt), cx, yy);
+    }
+  }
+
   /* ---- 子图 ---- */
   let cursor = priceBot;
   let macdView = null;
@@ -543,7 +612,7 @@ function drawCard(card) {
     }
   }
 
-  card._view = { n, s, dec, o, h, l, c, ma, bo, mc, rsi, macdView, rsiView, dates: d.dates };
+  card._view = { n, s, dec, o, h, l, c, ma, bo, mc, rsi, td, macdView, rsiView, dates: d.dates };
 }
 
 /* ============================ 卡片 DOM ============================ */
@@ -614,6 +683,14 @@ function onHover(card, ev) {
   }
   if (v.rsi) {
     lines.push('<span>RSI ' + nf(v.rsi[i], 1) + '</span>');
+  }
+
+  if (v.td) {
+    const bv = v.td.buy[i];
+    const sv = v.td.sell[i];
+    if (bv || sv) {
+      lines.push('<span class="td">TD9 ' + (bv ? 'Buy ' + bv : 'Sell ' + sv) + '</span>');
+    }
   }
 
   const tip = card.querySelector('.tip');
@@ -723,8 +800,8 @@ function updateFooter(shown) {
   const m = state.manifest || {};
   const total = (m.instruments || []).filter((i) => i.status === 'ok').length;
   const n = shown == null ? total : shown;
-  const keys = ['ma', 'boll', 'macd', 'rsi'];
-  const names = ['两极均线', 'BOLL', 'MACD', 'RSI'];
+  const keys = ['ma', 'boll', 'macd', 'rsi', 'td'];
+  const names = ['两极均线', 'BOLL', 'MACD', 'RSI', 'TD9'];
   const inds = names.filter((_, idx) => state.ind[keys[idx]]);
   f.textContent =
     n + ' / ' + total + ' 个品种 · ' + (TF_LABEL[state.timeframe] || '日线') +
@@ -753,7 +830,7 @@ function wireControls() {
   bars.value = state.bars;
   tf.value = state.timeframe;
 
-  ['ma', 'boll', 'macd', 'rsi'].forEach((k) => {
+  ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
     const cb = document.getElementById('ind-' + k);
     if (cb) cb.checked = !!state.ind[k];
   });
@@ -765,7 +842,7 @@ function wireControls() {
     state.bars = Number.isFinite(b) ? Math.min(500, Math.max(20, b)) : 130;
     state.method = method.value;
     state.timeframe = tf.value;
-    ['ma', 'boll', 'macd', 'rsi'].forEach((k) => {
+    ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
       const cb = document.getElementById('ind-' + k);
       if (cb) state.ind[k] = cb.checked;
     });
@@ -786,7 +863,7 @@ function wireControls() {
   }));
   tf.addEventListener('change', apply);
   method.addEventListener('change', apply);
-  ['ma', 'boll', 'macd', 'rsi'].forEach((k) => {
+  ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
     const cb = document.getElementById('ind-' + k);
     if (cb) cb.addEventListener('change', apply);
   });
@@ -822,6 +899,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     ema, sma, cascadeEMA, smaOfSma, twoPoleMA,
-    bollinger, macdCalc, rsiCalc, resample, decimalsFor,
+    bollinger, macdCalc, rsiCalc, tdSetup, resample, decimalsFor,
   };
 }
