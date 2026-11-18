@@ -15,6 +15,15 @@
   </div>
 
   <div class="ctrl">
+    <label>周期
+      <select id="tf">
+        <option value="D" selected>日线</option>
+        <option value="W">周线</option>
+        <option value="M">月线</option>
+        <option value="Q">季线</option>
+      </select>
+    </label>
+
     <label>均线周期
       <input id="period" type="number" min="2" max="400" step="1" value="20">
     </label>
@@ -27,8 +36,15 @@
     </label>
 
     <label>显示根数
-      <input id="bars" type="number" min="30" max="500" step="10" value="130">
+      <input id="bars" type="number" min="20" max="500" step="10" value="130">
     </label>
+
+    <div class="inds">
+      <label class="chk"><input type="checkbox" id="ind-ma" checked>均线</label>
+      <label class="chk"><input type="checkbox" id="ind-boll">BOLL</label>
+      <label class="chk"><input type="checkbox" id="ind-macd">MACD</label>
+      <label class="chk"><input type="checkbox" id="ind-rsi">RSI</label>
+    </div>
 
     <button id="apply">应用</button>
   </div>
