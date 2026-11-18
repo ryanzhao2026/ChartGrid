@@ -328,3 +328,19 @@ html, body {
   .tabs { top: auto; position: static; }
   .top { position: static; }
 }
+
+/* 分组 tab 上的整体技术评估徽章 */
+.tab { display: inline-flex; align-items: center; gap: 6px; }
+.tab .tab-name { white-space: nowrap; }
+.tab-ass {
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tab-ass[data-tone="bull"] { color: #26a69a; background: rgba(38,166,154,0.14); }
+.tab-ass[data-tone="bear"] { color: #ef5350; background: rgba(239,83,80,0.14); }
+.tab-ass[data-tone="flat"] { color: #8a93a6; background: rgba(138,147,166,0.14); }
+.tab-ass[data-tone="na"]   { color: #5c6373; }
