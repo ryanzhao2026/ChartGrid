@@ -1,0 +1,460 @@
+{
+  "generated_at": "2026-11-18T02:39:08+0000",
+  "source": "yfinance (continuous futures)",
+  "requested_days": 500,
+  "count": 46,
+  "ok": 41,
+  "failed": 5,
+  "instruments": [
+    {
+      "key": "ES=F",
+      "name": "S&P 500",
+      "group": "Indices",
+      "file": "ES.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 7384.0,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "NQ=F",
+      "name": "Nasdaq 100",
+      "group": "Indices",
+      "file": "NQ.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 27237.25,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "YM=F",
+      "name": "Dow 30",
+      "group": "Indices",
+      "file": "YM.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 50869.0,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "RTY=F",
+      "name": "Russell 2000",
+      "group": "Indices",
+      "file": "RTY.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 2713.3,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "NKD=F",
+      "name": "Nikkei 225",
+      "group": "Indices",
+      "file": "NKD.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 58720.0,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "^VIX",
+      "name": "VIX",
+      "group": "Indices",
+      "file": "VIX.json",
+      "status": "ok",
+      "bars": 482,
+      "last": 25.46,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZQ=F",
+      "name": "30-Day Fed Funds",
+      "group": "Rates",
+      "file": "ZQ.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 95.84,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZT=F",
+      "name": "2-Year Note",
+      "group": "Rates",
+      "file": "ZT.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 101.9062,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZF=F",
+      "name": "5-Year Note",
+      "group": "Rates",
+      "file": "ZF.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 104.1797,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZN=F",
+      "name": "10-Year Note",
+      "group": "Rates",
+      "file": "ZN.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 105.6406,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "TN=F",
+      "name": "Ultra 10-Year",
+      "group": "Rates",
+      "file": "TN.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 106.8438,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZB=F",
+      "name": "30-Year Bond",
+      "group": "Rates",
+      "file": "ZB.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 105.8125,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "UB=F",
+      "name": "Ultra Bond",
+      "group": "Rates",
+      "file": "UB.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 106.9375,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "^TNX",
+      "name": "10-Year Yield",
+      "group": "Rates",
+      "file": "TNX.json",
+      "status": "ok",
+      "bars": 500,
+      "last": 5.103,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "CL=F",
+      "name": "Crude Oil WTI",
+      "group": "Energy",
+      "file": "CL.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 85.05,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "BZ=F",
+      "name": "Crude Oil Brent",
+      "group": "Energy",
+      "file": "BZ.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 92.63,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "NG=F",
+      "name": "Natural Gas",
+      "group": "Energy",
+      "file": "NG.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 3.175,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "RB=F",
+      "name": "Gasoline RBOB",
+      "group": "Energy",
+      "file": "RB.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 2.4889,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "HO=F",
+      "name": "Heating Oil",
+      "group": "Energy",
+      "file": "HO.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 3.9544,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "GC=F",
+      "name": "Gold",
+      "group": "Metals",
+      "file": "GC.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 3803.7,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "SI=F",
+      "name": "Silver",
+      "group": "Metals",
+      "file": "SI.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 46.12,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "PL=F",
+      "name": "Platinum",
+      "group": "Metals",
+      "file": "PL.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 1406.5,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "PA=F",
+      "name": "Palladium",
+      "group": "Metals",
+      "file": "PA.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 954.0,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "HG=F",
+      "name": "Copper",
+      "group": "Metals",
+      "file": "HG.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 5.9515,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZS=F",
+      "name": "Soybeans",
+      "group": "Grains",
+      "file": "ZS.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 1228.75,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZM=F",
+      "name": "Soybean Meal",
+      "group": "Grains",
+      "file": "ZM.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 335.8,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZL=F",
+      "name": "Soybean Oil",
+      "group": "Grains",
+      "file": "ZL.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 61.85,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZC=F",
+      "name": "Corn",
+      "group": "Grains",
+      "file": "ZC.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 445.75,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZW=F",
+      "name": "Wheat",
+      "group": "Grains",
+      "file": "ZW.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 607.25,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "ZR=F",
+      "name": "Rough Rice",
+      "group": "Grains",
+      "file": "ZR.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 18.42,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "KC=F",
+      "name": "Coffee",
+      "group": "Softs & Meats",
+      "file": "KC.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 279.95,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "CC=F",
+      "name": "Cocoa",
+      "group": "Softs & Meats",
+      "file": "CC.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 5184.0,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "SB=F",
+      "name": "Sugar",
+      "group": "Softs & Meats",
+      "file": "SB.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 18.17,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "CT=F",
+      "name": "Cotton",
+      "group": "Softs & Meats",
+      "file": "CT.json",
+      "status": "ok",
+      "bars": 412,
+      "last": 77.0,
+      "lastDate": "2026-11-16"
+    },
+    {
+      "key": "LB=F",
+      "name": "Lumber",
+      "group": "Softs & Meats",
+      "file": null,
+      "status": "failed",
+      "bars": 0
+    },
+    {
+      "key": "LC=F",
+      "name": "Live Cattle",
+      "group": "Softs & Meats",
+      "file": null,
+      "status": "failed",
+      "bars": 0
+    },
+    {
+      "key": "FC=F",
+      "name": "Feeder Cattle",
+      "group": "Softs & Meats",
+      "file": null,
+      "status": "failed",
+      "bars": 0
+    },
+    {
+      "key": "LH=F",
+      "name": "Lean Hogs",
+      "group": "Softs & Meats",
+      "file": null,
+      "status": "failed",
+      "bars": 0
+    },
+    {
+      "key": "DX=F",
+      "name": "US Dollar Index",
+      "group": "Currencies",
+      "file": null,
+      "status": "failed",
+      "bars": 0
+    },
+    {
+      "key": "6E=F",
+      "name": "Euro",
+      "group": "Currencies",
+      "file": "6E.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 1.1005,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "6J=F",
+      "name": "Japanese Yen",
+      "group": "Currencies",
+      "file": "6J.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 0.0063,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "6B=F",
+      "name": "British Pound",
+      "group": "Currencies",
+      "file": "6B.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 1.3207,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "6C=F",
+      "name": "Canadian Dollar",
+      "group": "Currencies",
+      "file": "6C.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 0.6998,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "6S=F",
+      "name": "Swiss Franc",
+      "group": "Currencies",
+      "file": "6S.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 1.1935,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "6A=F",
+      "name": "Australian Dollar",
+      "group": "Currencies",
+      "file": "6A.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 0.6726,
+      "lastDate": "2026-11-17"
+    },
+    {
+      "key": "BTC=F",
+      "name": "Bitcoin",
+      "group": "Crypto",
+      "file": "BTC.json",
+      "status": "ok",
+      "bars": 413,
+      "last": 64570.0,
+      "lastDate": "2026-11-17"
+    }
+  ]
+}
