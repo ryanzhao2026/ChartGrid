@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-23T22:57:52+0000",
+  "generated_at": "2026-11-24T23:01:02+0000",
   "source": "yfinance (continuous futures)",
   "requested_days": 500,
   "count": 46,
@@ -12,9 +12,9 @@
       "group": "Indices",
       "file": "ES.json",
       "status": "ok",
-      "bars": 412,
-      "last": 7270.5,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 7210.75,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "NQ=F",
@@ -22,9 +22,9 @@
       "group": "Indices",
       "file": "NQ.json",
       "status": "ok",
-      "bars": 412,
-      "last": 26845.0,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 26266.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "YM=F",
@@ -32,9 +32,9 @@
       "group": "Indices",
       "file": "YM.json",
       "status": "ok",
-      "bars": 412,
-      "last": 49785.0,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 50043.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "RTY=F",
@@ -42,9 +42,9 @@
       "group": "Indices",
       "file": "RTY.json",
       "status": "ok",
-      "bars": 412,
-      "last": 2678.1001,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 2688.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "NKD=F",
@@ -52,9 +52,9 @@
       "group": "Indices",
       "file": "NKD.json",
       "status": "ok",
-      "bars": 412,
-      "last": 58120.0,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 57420.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "^VIX",
@@ -63,8 +63,8 @@
       "file": "VIX.json",
       "status": "ok",
       "bars": 482,
-      "last": 26.62,
-      "lastDate": "2026-11-23"
+      "last": 26.36,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZQ=F",
@@ -72,9 +72,9 @@
       "group": "Rates",
       "file": "ZQ.json",
       "status": "ok",
-      "bars": 412,
-      "last": 95.835,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 95.7,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZT=F",
@@ -82,9 +82,9 @@
       "group": "Rates",
       "file": "ZT.json",
       "status": "ok",
-      "bars": 412,
-      "last": 102.1055,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 102.125,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZF=F",
@@ -92,9 +92,9 @@
       "group": "Rates",
       "file": "ZF.json",
       "status": "ok",
-      "bars": 412,
-      "last": 104.7656,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 104.8906,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZN=F",
@@ -102,9 +102,9 @@
       "group": "Rates",
       "file": "ZN.json",
       "status": "ok",
-      "bars": 412,
-      "last": 106.5312,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 106.6875,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "TN=F",
@@ -112,9 +112,9 @@
       "group": "Rates",
       "file": "TN.json",
       "status": "ok",
-      "bars": 412,
-      "last": 108.1094,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 108.25,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZB=F",
@@ -122,9 +122,9 @@
       "group": "Rates",
       "file": "ZB.json",
       "status": "ok",
-      "bars": 412,
-      "last": 107.625,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 107.4688,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "UB=F",
@@ -132,9 +132,9 @@
       "group": "Rates",
       "file": "UB.json",
       "status": "ok",
-      "bars": 412,
-      "last": 109.2188,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 109.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "^TNX",
@@ -143,8 +143,8 @@
       "file": "TNX.json",
       "status": "ok",
       "bars": 500,
-      "last": 4.918,
-      "lastDate": "2026-11-23"
+      "last": 4.904,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "CL=F",
@@ -152,9 +152,9 @@
       "group": "Energy",
       "file": "CL.json",
       "status": "ok",
-      "bars": 412,
-      "last": 80.25,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 81.69,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "BZ=F",
@@ -162,9 +162,9 @@
       "group": "Energy",
       "file": "BZ.json",
       "status": "ok",
-      "bars": 412,
-      "last": 86.72,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 88.5,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "NG=F",
@@ -172,9 +172,9 @@
       "group": "Energy",
       "file": "NG.json",
       "status": "ok",
-      "bars": 412,
-      "last": 3.537,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 3.67,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "RB=F",
@@ -182,9 +182,9 @@
       "group": "Energy",
       "file": "RB.json",
       "status": "ok",
-      "bars": 412,
-      "last": 2.395,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 2.4347,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "HO=F",
@@ -192,9 +192,9 @@
       "group": "Energy",
       "file": "HO.json",
       "status": "ok",
-      "bars": 412,
-      "last": 3.6466,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 3.654,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "GC=F",
@@ -202,9 +202,9 @@
       "group": "Metals",
       "file": "GC.json",
       "status": "ok",
-      "bars": 412,
-      "last": 3634.3999,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 3555.1001,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "SI=F",
@@ -212,9 +212,9 @@
       "group": "Metals",
       "file": "SI.json",
       "status": "ok",
-      "bars": 412,
-      "last": 42.99,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 40.71,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "PL=F",
@@ -222,9 +222,9 @@
       "group": "Metals",
       "file": "PL.json",
       "status": "ok",
-      "bars": 412,
-      "last": 1314.5,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 1257.5,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "PA=F",
@@ -232,9 +232,9 @@
       "group": "Metals",
       "file": "PA.json",
       "status": "ok",
-      "bars": 411,
-      "last": 893.5,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 857.5,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "HG=F",
@@ -242,9 +242,9 @@
       "group": "Metals",
       "file": "HG.json",
       "status": "ok",
-      "bars": 412,
-      "last": 5.612,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 5.4845,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZS=F",
@@ -252,9 +252,9 @@
       "group": "Grains",
       "file": "ZS.json",
       "status": "ok",
-      "bars": 411,
-      "last": 1227.5,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 1232.25,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZM=F",
@@ -262,9 +262,9 @@
       "group": "Grains",
       "file": "ZM.json",
       "status": "ok",
-      "bars": 411,
-      "last": 343.9,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 350.6,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZL=F",
@@ -272,9 +272,9 @@
       "group": "Grains",
       "file": "ZL.json",
       "status": "ok",
-      "bars": 411,
-      "last": 59.44,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 58.11,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZC=F",
@@ -282,9 +282,9 @@
       "group": "Grains",
       "file": "ZC.json",
       "status": "ok",
-      "bars": 411,
-      "last": 449.0,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 450.25,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZW=F",
@@ -292,9 +292,9 @@
       "group": "Grains",
       "file": "ZW.json",
       "status": "ok",
-      "bars": 411,
-      "last": 594.5,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 588.75,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "ZR=F",
@@ -302,9 +302,9 @@
       "group": "Grains",
       "file": "ZR.json",
       "status": "ok",
-      "bars": 411,
-      "last": 18.8,
-      "lastDate": "2026-11-23"
+      "bars": 412,
+      "last": 18.79,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "KC=F",
@@ -312,9 +312,9 @@
       "group": "Softs & Meats",
       "file": "KC.json",
       "status": "ok",
-      "bars": 412,
-      "last": 267.35,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 260.4,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "CC=F",
@@ -322,9 +322,9 @@
       "group": "Softs & Meats",
       "file": "CC.json",
       "status": "ok",
-      "bars": 412,
-      "last": 5281.0,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 5444.0,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "SB=F",
@@ -332,9 +332,9 @@
       "group": "Softs & Meats",
       "file": "SB.json",
       "status": "ok",
-      "bars": 412,
-      "last": 17.58,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 17.7,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "CT=F",
@@ -342,9 +342,9 @@
       "group": "Softs & Meats",
       "file": "CT.json",
       "status": "ok",
-      "bars": 411,
-      "last": 75.47,
-      "lastDate": "2026-11-20"
+      "bars": 412,
+      "last": 77.53,
+      "lastDate": "2026-11-23"
     },
     {
       "key": "LB=F",
@@ -392,9 +392,9 @@
       "group": "Currencies",
       "file": "6E.json",
       "status": "ok",
-      "bars": 412,
-      "last": 1.0914,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 1.0974,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "6J=F",
@@ -402,9 +402,9 @@
       "group": "Currencies",
       "file": "6J.json",
       "status": "ok",
-      "bars": 412,
+      "bars": 413,
       "last": 0.0063,
-      "lastDate": "2026-11-23"
+      "lastDate": "2026-11-24"
     },
     {
       "key": "6B=F",
@@ -412,9 +412,9 @@
       "group": "Currencies",
       "file": "6B.json",
       "status": "ok",
-      "bars": 412,
-      "last": 1.3033,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 1.3116,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "6C=F",
@@ -422,9 +422,9 @@
       "group": "Currencies",
       "file": "6C.json",
       "status": "ok",
-      "bars": 412,
-      "last": 0.697,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 0.7014,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "6S=F",
@@ -432,9 +432,9 @@
       "group": "Currencies",
       "file": "6S.json",
       "status": "ok",
-      "bars": 412,
-      "last": 1.1913,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 1.1994,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "6A=F",
@@ -442,9 +442,9 @@
       "group": "Currencies",
       "file": "6A.json",
       "status": "ok",
-      "bars": 412,
-      "last": 0.6626,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 0.6637,
+      "lastDate": "2026-11-24"
     },
     {
       "key": "BTC=F",
@@ -452,9 +452,9 @@
       "group": "Crypto",
       "file": "BTC.json",
       "status": "ok",
-      "bars": 412,
-      "last": 61215.0,
-      "lastDate": "2026-11-23"
+      "bars": 413,
+      "last": 59725.0,
+      "lastDate": "2026-11-24"
     }
   ]
 }
