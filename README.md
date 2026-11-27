@@ -1,7 +1,7 @@
 # ChartGrid
 
 Finviz `Futures Charts` 风格的期货图表网格，图上叠加**两极移动平均线（Two-Pole Moving Average）**，
-并支持**日/周/月/季**四档周期与 **BOLL / MACD / RSI** 指标。
+并支持**日/周/月/季**四档周期与 **NW 带 / MACD / RSI / TD9** 指标。
 纯静态站点：无框架、无依赖、单文件渲染器，数据由 GitHub Actions 每日抓取。
 
 线上地址：`https://ryanzhao2026.github.io/ChartGrid/`
@@ -64,20 +64,24 @@ p2 = SMA(p1, N)                             <- 输出 p2
 
 ## 3. 指标
 
-三个指标都在**聚合后的收盘价**上计算（即看周线时用周收盘价算），与主流行情软件一致。
-可勾选组合：均线 / BOLL / MACD / RSI 各自独立开关，MACD 与 RSI 画在下方独立子图。
+四个指标都在**聚合后的收盘价**上计算（即看周线时用周收盘价算），与主流行情软件一致。
+可勾选组合：均线 / NW带 / MACD / RSI / TD9 各自独立开关，MACD 与 RSI 画在下方独立子图。
 
-### BOLL 布林带（默认 20, 2）
+### NW 包络（Nadaraya-Watson，默认带宽 8、倍数 3）
+
+取自 LuxAlgo 的 Nadaraya-Watson Envelope，用**高斯核加权平均**代替 SMA 做「局部平均价」：
 
 ```
-mid   = SMA(close, N)
-sd    = sqrt( Σ(close - mid)^2 / N )        <- 总体标准差
-upper = mid + k*sd
-lower = mid - k*sd
+w(x)    = exp( -x² / (2h²) )                 <- 高斯权重，h = 带宽
+center  = Σ(close[j] · w(i-j)) / Σ w(i-j)    <- 只用最近 radius = 4h 根
+band    = SMA(|close - center|, 100) * mult  <- 平均绝对误差 × 倍数
+upper   = center + band
+lower   = center - band
 ```
 
-主图叠加：上下轨为半透明描边，通道内部浅色填充，中轨灰色实线。价格区范围会把上下轨纳入，
-避免通道被裁掉。自检：常数序列 42 -> mid/up/low 全为 42；末位与手算结果 6 位小数完全一致。
+带宽越大曲线越平滑（跟随越慢），倍数越大通道越宽（越不容易被突破）。
+主图叠加：上下轨为青色/红色描边，中心线为灰色虚线，带内浅色填充，价格突破轨道时标 ▲▼。
+打分逻辑中的「位置」因子即取当前价在 NW 带内的相对位置。
 
 ### MACD（默认 12, 26, 9）
 
@@ -107,16 +111,18 @@ RSI = 100 - 100/(1+RS)
 | 区域 | 说明 |
 |---|---|
 | 周期 | 日线 / 周线 / 月线 / 季线 |
-| 均线周期 | 2-400，默认 20 |
-| 均线口径 | 级联 EMA（两极） / SMA 的 SMA（两极） |
+| 均线周期 | 2-400，默认 50 |
+| 均线口径 | 级联 EMA / SMA 的 SMA（两极） / SMA / EMA / WMA / HMA / DEMA / TEMA / ZLEMA / KAMA / JMA（Jurik 近似） |
+| NW 带宽 / 倍数 | 带宽 1-50（默认 8）、倍数 0.5-10（默认 3） |
 | 显示根数 | 20-500，默认 130（长周期建议调小） |
-| 指标勾选 | 均线 / BOLL / MACD / RSI |
+| 指标勾选 | 均线 / NW带 / MACD / RSI / TD9（默认前四项除 RSI 外全开） |
 | 分组 Tab | All / Indices / Rates / Energy / Metals / Grains / Softs & Meats / Currencies / Crypto |
 | 悬停 | 显示该根日期、O/H/L/C，以及当前开启的各指标值 |
 | 页脚 | 品种数、当前周期、均线参数、已开指标、根数、数据生成时间 |
 
 卡片高度随子图数量自适应：无子图 324x200，一个子图 324x250，两个子图 324x300。
 指标在 41 个品种上全量重算约在百毫秒级，点击「应用」即时重绘。
+分组 Tab 上会显示该组的整体技术评估（趋势/动量/强度/衰竭/位置五因子加权打分）。
 
 ---
 
@@ -126,7 +132,8 @@ RSI = 100 - 100/(1+RS)
 ChartGrid/
 ├── index.html              # 页面骨架 + 控件
 ├── style.css               # 暗色主题
-├── app.js                  # 周期聚合 + 指标 + canvas 渲染器
+├── app.js                  # 周期聚合 + canvas 渲染器 + 打分
+├── indicators.js           # 纯指标计算（无 DOM 依赖，可单独复用）
 ├── fetch_data.py           # yfinance 抓取 -> data/*.json
 ├── requirements.txt
 ├── data/
@@ -172,7 +179,8 @@ python -m http.server 8000               # 必须走 HTTP，file:// 下 fetch �
 
 - 使用**连续合约**（`ES=F` 这类），换月处有跳空，不适合做精确的绝对价回测
 - 长周期（月/季）在 500 根日线下样本不长：月线约 24 根、季线约 8 根，指标预热不足会显示为空或滞后
-- BOLL 用**总体标准差**（除以 N）；部分软件用样本标准差（除以 N-1），数值会有微小差异
+- NW 带的 MAE 用 `maeLen=100`（Pine 原版为 499），因每品种仅约 414-500 根日线，拉长窗口会让前期全为空白
+- NW 带只实现**端点（因果）模式**：历史值不会随后续数据变化；Pine 原版的「重绘模式」会改写历史曲线，故未采用
 - MACD 的 EMA 从序列首根开始递推，未做前 26 根丢弃处理，与部分软件的「预热丢弃」口径略有差别
 - `NKD=F`、`LB=F`、部分软商品在 Yahoo 上覆盖不稳，失败即跳过
 - 图表为日线及更长周期；分时数据不在本项目范围内
