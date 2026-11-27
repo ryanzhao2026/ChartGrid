@@ -13,7 +13,8 @@
 import {
   ema, sma, cascadeEMA, smaOfSma, twoPoleMA,
   wma, hma, dema, tema, zlema, kama, jma,
-  bollinger, macdCalc, rsiCalc, tdSetup,
+  macdCalc, rsiCalc, tdSetup,
+  nwBand, nwSignals, NW_DEFAULTS,
   resample, decimalsFor,
   assess, assessLabel,
 } from './indicators.js';
@@ -27,8 +28,8 @@ const state = {
   method: 'cascade',
   bars: 130,
   timeframe: 'D',
-  ind: { ma: true, boll: true, macd: true, rsi: false, td: true },
-  bollN: 20, bollK: 2,
+  ind: { ma: true, nw: true, macd: true, rsi: false, td: true },
+  nwH: NW_DEFAULTS.h, nwMult: NW_DEFAULTS.mult, nwMaeLen: NW_DEFAULTS.maeLen,
   macdFast: 12, macdSlow: 26, macdSig: 9,
   rsiN: 14,
 };
@@ -37,9 +38,10 @@ const PALETTE = {
   up: '#26a69a',
   down: '#ef5350',
   ma: '#f0b90b',
-  bollMid: '#7f8fa6',
-  bollBand: 'rgba(126,143,166,0.50)',
-  bollFill: 'rgba(126,143,166,0.09)',
+  nwUp: 'rgba(0,220,170,0.85)',
+  nwDn: 'rgba(255,82,82,0.85)',
+  nwMid: 'rgba(126,143,166,0.55)',
+  nwFill: 'rgba(126,143,166,0.07)',
   macdLine: '#3d7eff',
   macdSig: '#f0b90b',
   rsi: '#b388ff',
@@ -116,10 +118,23 @@ function drawCard(card) {
   const maFull = twoPoleMA(d.c, state.period, state.method);
   const ma = tail(maFull, s, n);
 
-  let bo = null;
-  if (ind.boll) {
-    const b = bollinger(d.c, state.bollN, state.bollK);
-    bo = { mid: tail(b.mid, s, n), up: tail(b.up, s, n), low: tail(b.low, s, n) };
+  let nw = null;
+  if (ind.nw) {
+    // 包络在整段序列上算（端点口径因果，历史值不随显示窗口变化）；
+    // 参数变才重算，切分组/改显示根数走缓存。
+    const key = state.timeframe + '|' + state.nwH + '|' + state.nwMult + '|' + state.nwMaeLen;
+    let full = card._nw;
+    if (!full || full.key !== key) {
+      const band = nwBand(d.c, { h: state.nwH, mult: state.nwMult, maeLen: state.nwMaeLen });
+      full = card._nw = { key, band, sig: nwSignals(d.c, band) };
+    }
+    nw = {
+      mid: tail(full.band.center, s, n),
+      up: tail(full.band.up, s, n),
+      low: tail(full.band.low, s, n),
+      bull: tail(full.sig.bull, s, n),
+      bear: tail(full.sig.bear, s, n),
+    };
   }
   let mc = null;
   if (ind.macd) {
@@ -173,7 +188,7 @@ function drawCard(card) {
     if (h[i] > hi) hi = h[i];
     const m = ma[i];
     if (!Number.isNaN(m)) { if (m < lo) lo = m; if (m > hi) hi = m; }
-    if (bo) for (const b of [bo.up[i], bo.low[i]]) {
+    if (nw) for (const b of [nw.up[i], nw.low[i]]) {
       if (!Number.isNaN(b)) { if (b < lo) lo = b; if (b > hi) hi = b; }
     }
   }
@@ -205,45 +220,74 @@ function drawCard(card) {
     ctx.fillText(nf(p, dec), PAD_L + plotW + 5, yy);
   }
 
-  /* ---- BOLL 通道（先画，压在 K 线下层） ---- */
-  if (bo) {
-    ctx.beginPath();
-    let started = false;
+  /* ---- NW 包络（先画，压在 K 线下层） ---- */
+  if (nw) {
+    // 带内填充：上下轨之间
+    let firstI = -1, lastI = -1;
     for (let i = 0; i < n; i++) {
-      const v = bo.up[i];
-      if (Number.isNaN(v)) continue;
-      if (!started) { ctx.moveTo(x(i), yP(v)); started = true; } else ctx.lineTo(x(i), yP(v));
+      if (!Number.isNaN(nw.up[i]) && !Number.isNaN(nw.low[i])) {
+        if (firstI < 0) firstI = i;
+        lastI = i;
+      }
     }
-    for (let i = n - 1; i >= 0; i--) {
-      const v = bo.low[i];
-      if (Number.isNaN(v)) continue;
-      ctx.lineTo(x(i), yP(v));
+    if (firstI >= 0) {
+      ctx.beginPath();
+      for (let i = firstI; i <= lastI; i++) {
+        const v = nw.up[i];
+        if (Number.isNaN(v)) continue;
+        if (i === firstI) ctx.moveTo(x(i), yP(v)); else ctx.lineTo(x(i), yP(v));
+      }
+      for (let i = lastI; i >= firstI; i--) {
+        const v = nw.low[i];
+        if (Number.isNaN(v)) continue;
+        ctx.lineTo(x(i), yP(v));
+      }
+      ctx.closePath();
+      ctx.fillStyle = PALETTE.nwFill;
+      ctx.fill();
     }
-    ctx.closePath();
-    ctx.fillStyle = PALETTE.bollFill;
-    ctx.fill();
 
-    ctx.lineWidth = 1;
-    for (const arr of [bo.up, bo.low]) {
-      ctx.strokeStyle = PALETTE.bollBand;
+    // 上下轨
+    ctx.lineWidth = 1.2;
+    for (const pair of [[nw.up, PALETTE.nwUp], [nw.low, PALETTE.nwDn]]) {
+      ctx.strokeStyle = pair[1];
       ctx.beginPath();
       let st = false;
       for (let i = 0; i < n; i++) {
-        const v = arr[i];
+        const v = pair[0][i];
         if (Number.isNaN(v)) { st = false; continue; }
         if (!st) { ctx.moveTo(x(i), yP(v)); st = true; } else ctx.lineTo(x(i), yP(v));
       }
       ctx.stroke();
     }
-    ctx.strokeStyle = PALETTE.bollMid;
+
+    // 中心线（虚线，弱化）
+    ctx.strokeStyle = PALETTE.nwMid;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
     ctx.beginPath();
     let st2 = false;
     for (let i = 0; i < n; i++) {
-      const v = bo.mid[i];
+      const v = nw.mid[i];
       if (Number.isNaN(v)) { st2 = false; continue; }
       if (!st2) { ctx.moveTo(x(i), yP(v)); st2 = true; } else ctx.lineTo(x(i), yP(v));
     }
     ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 突破标记：▲ 上破上轨（标在最低价下方）／▼ 下破下轨（标在最高价上方）
+    ctx.textAlign = 'center';
+    ctx.font = '9px ui-monospace, SFMono-Regular, Menlo, monospace';
+    for (let i = 0; i < n; i++) {
+      if (nw.bull[i]) {
+        ctx.fillStyle = PALETTE.nwUp;
+        ctx.fillText('▲', x(i), yP(l[i]) - 6);
+      }
+      if (nw.bear[i]) {
+        ctx.fillStyle = PALETTE.nwDn;
+        ctx.fillText('▼', x(i), yP(h[i]) + 6 + 8);
+      }
+    }
   }
 
   /* ---- K 线 ---- */
@@ -405,7 +449,7 @@ function drawCard(card) {
     }
   }
 
-  card._view = { n, s, dec, o, h, l, c, ma, bo, mc, rsi, td, macdView, rsiView, dates: d.dates };
+  card._view = { n, s, dec, o, h, l, c, ma, nw, mc, rsi, td, macdView, rsiView, dates: d.dates };
 }
 
 /* ============================ 卡片 DOM ============================ */
@@ -465,9 +509,9 @@ function onHover(card, ev) {
   if (state.ind.ma) {
     lines.push('<span class="ma">MA ' + nf(v.ma[i], dec) + '</span>');
   }
-  if (v.bo) {
-    lines.push('<span class="boll">BOLL ' + nf(v.bo.mid[i], dec) +
-      ' / ' + nf(v.bo.up[i], dec) + ' / ' + nf(v.bo.low[i], dec) + '</span>');
+  if (v.nw) {
+    lines.push('<span class="boll">NW ' + nf(v.nw.mid[i], dec) +
+      ' / ' + nf(v.nw.up[i], dec) + ' / ' + nf(v.nw.low[i], dec) + '</span>');
   }
   if (v.mc) {
     lines.push('<span>MACD ' + nf(v.mc.line[i], 2) +
@@ -640,8 +684,8 @@ function updateFooter(shown) {
   const m = state.manifest || {};
   const total = (m.instruments || []).filter((i) => i.status === 'ok').length;
   const n = shown == null ? total : shown;
-  const keys = ['ma', 'boll', 'macd', 'rsi', 'td'];
-  const names = ['均线', 'BOLL', 'MACD', 'RSI', 'TD9'];
+  const keys = ['ma', 'nw', 'macd', 'rsi', 'td'];
+  const names = ['均线', 'NW带(' + state.nwH + '×' + state.nwMult + ')', 'MACD', 'RSI', 'TD9'];
   const inds = names.filter((_, idx) => state.ind[keys[idx]]);
   f.textContent =
     n + ' / ' + total + ' 个品种 · ' + (TF_LABEL[state.timeframe] || '日线') +
@@ -670,10 +714,15 @@ function wireControls() {
   bars.value = state.bars;
   tf.value = state.timeframe;
 
-  ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
+  ['ma', 'nw', 'macd', 'rsi', 'td'].forEach((k) => {
     const cb = document.getElementById('ind-' + k);
     if (cb) cb.checked = !!state.ind[k];
   });
+
+  const nwH = document.getElementById('nw-h');
+  const nwMult = document.getElementById('nw-mult');
+  if (nwH) nwH.value = state.nwH;
+  if (nwMult) nwMult.value = state.nwMult;
 
   const readForm = () => {
     const p = parseInt(period.value, 10);
@@ -682,7 +731,17 @@ function wireControls() {
     state.bars = Number.isFinite(b) ? Math.min(500, Math.max(20, b)) : 130;
     state.method = method.value;
     state.timeframe = tf.value;
-    ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
+    if (nwH) {
+      const hv = parseFloat(nwH.value);
+      state.nwH = Number.isFinite(hv) ? Math.min(50, Math.max(1, hv)) : NW_DEFAULTS.h;
+      nwH.value = state.nwH;
+    }
+    if (nwMult) {
+      const mv = parseFloat(nwMult.value);
+      state.nwMult = Number.isFinite(mv) ? Math.min(10, Math.max(0.5, mv)) : NW_DEFAULTS.mult;
+      nwMult.value = state.nwMult;
+    }
+    ['ma', 'nw', 'macd', 'rsi', 'td'].forEach((k) => {
       const cb = document.getElementById('ind-' + k);
       if (cb) state.ind[k] = cb.checked;
     });
@@ -698,12 +757,12 @@ function wireControls() {
   };
 
   document.getElementById('apply').onclick = apply;
-  [period, bars].forEach((el) => el.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') apply();
-  }));
+  [period, bars, nwH, nwMult].forEach((el) => {
+    if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') apply(); });
+  });
   tf.addEventListener('change', apply);
   method.addEventListener('change', apply);
-  ['ma', 'boll', 'macd', 'rsi', 'td'].forEach((k) => {
+  ['ma', 'nw', 'macd', 'rsi', 'td'].forEach((k) => {
     const cb = document.getElementById('ind-' + k);
     if (cb) cb.addEventListener('change', apply);
   });
