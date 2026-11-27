@@ -13,7 +13,7 @@ permissions:
   pages: write
   id-token: write
 
-# 数据提交与 Pages 部署串行，避免两个 run 同时 push data/ 造成 rebase 冲突
+# 数据提交与 Pages 部署串行，避免两个 run 同时写 data/
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -22,6 +22,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 需要完整历史：Commit data 步骤要以 origin/main 为基底重建索引再 push
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -37,45 +38,57 @@ jobs:
       - name: Fetch futures data
         run: python fetch_data.py --days 500
 
-      # 放行前先确认数据文件是合法 JSON。冲突标记一旦被提交，
+      # 部署前确认数据文件是合法 JSON。冲突标记一旦进入 Pages 产物，
       # 线上页面会直接「加载 manifest 失败」白屏，所以这里必须硬失败。
       - name: Validate data files
         run: |
           set -euo pipefail
           fail=0
-          if grep -rlE '^(<<<<<<<|>>>>>>>|=======)$' data/ ; then
+          if grep -rlE '^(<<<<<<<|=======|>>>>>>>)' data/ ; then
             echo "::error::data/ 中存在 Git 冲突标记"
             fail=1
           fi
+          shopt -s nullglob
           for f in data/*.json; do
             python -c "import json,sys; json.load(open(sys.argv[1]))" "$f" \
               || { echo "::error::JSON 解析失败：$f"; fail=1; }
           done
           exit $fail
 
+      # data/ 每次都是全量重新生成的快照，文本层面的合并没有意义。
+      # 之前用 git pull --rebase 会因 manifest.json 的 generated_at 冲突而失败，
+      # 失败的 rebase 又把带冲突标记的文件留在了仓库里。
+      # 这里改为：以远端 main 为基底重建索引，只提交本次新生成的 data/。
+      # reset --mixed 只重置索引、不动工作区，因此新抓的数据不会被冲掉。
       - name: Commit data
         run: |
-          set -euo pipefail
+          set -uo pipefail
           git config user.name  "chartgrid-bot"
           git config user.email "chartgrid-bot@users.noreply.github.com"
-          git add data/
-          if git diff --cached --quiet; then
-            echo "数据无变化，跳过提交"
-            exit 0
-          fi
-          git commit -m "data: $(date -u +'%Y-%m-%d %H:%M') UTC"
+
           for i in 1 2 3; do
-            if git pull --rebase --autostash origin main && git push; then
-              echo "推送成功"
+            git fetch --quiet origin main
+            git reset --mixed --quiet origin/main
+            git add data/
+
+            if git diff --cached --quiet; then
+              echo "数据无变化，跳过提交"
+              exit 0
+            fi
+
+            git commit --quiet -m "data: $(date -u +'%Y-%m-%d %H:%M') UTC"
+            if git push --quiet origin HEAD:main; then
+              echo "数据推送成功"
               exit 0
             fi
             echo "第 $i 次推送失败，5s 后重试"
-            # 上一次失败的 rebase 可能留下半成品状态，必须先清干净再重试
-            git rebase --abort || true
+            git reset --soft --quiet HEAD~1 || true
             sleep 5
           done
-          echo "::error::数据提交连续 3 次失败，请检查 main 分支状态"
-          exit 1
+
+          # 数据没推上去不影响部署：本次 artifact 用的是工作区里已校验过的新数据。
+          echo "::warning::数据提交连续 3 次失败，本次部署继续但仓库数据可能滞后"
+          exit 0
 
       - uses: actions/configure-pages@v5
 
