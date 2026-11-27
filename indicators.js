@@ -31,7 +31,8 @@
  *
  * 指标口径
  * --------
- * BOLL(n=20,k=2)  mid=SMA(c,n), sd=总体标准差, up/low=mid±k*sd
+ * NW 包络(h,mult) Nadaraya-Watson 高斯核加权中心线 + MAE 带宽（替代原 BOLL）
+ * BOLL(n=20,k=2)  mid=SMA(c,n), sd=总体标准差, up/low=mid±k*sd（保留导出，主图已不用）
  * MACD(12,26,9)   line=EMA12-EMA26, signal=EMA(line,9), hist=line-signal
  * RSI(14)         Wilder 平滑：avgGain/avgLoss，RSI=100-100/(1+RS)
  * TD Setup 9      连续 9 根 close 高于/低于 close[4]（DeMark Magic 9）
@@ -273,6 +274,112 @@ function bollinger(closes, n, k) {
   return { mid, up, low };
 }
 
+/* ---------------------- Nadaraya-Watson 包络 ---------------------- */
+
+/**
+ * 高斯核：w(d) = exp(-d^2 / (2h^2))
+ * h（带宽）单位是「根」。h 越大曲线越平滑、越滞后；h 越小越贴价格。
+ */
+function nwGauss(d, h) {
+  return Math.exp(-(d * d) / (2 * h * h));
+}
+
+/**
+ * NW 包络（端点/因果口径，对应 Pine 的 repaint = false）
+ * ------------------------------------------------------
+ * 对每根 bar i：
+ *   center[i] = Σ_j close[j]·w(i-j) / Σ_j w(i-j)   j ∈ [i-radius, i]
+ * 只回看、不回补，所以第 i 根算出来之后历史值永不再变（因果）。
+ * 带宽：
+ *   mae   = SMA(|close - center|, maeLen)   残差平均绝对值 ≈ 波动尺度
+ *   up    = center + mult·mae
+ *   low   = center - mult·mae
+ *
+ * 与 Pine 原版的差异（有意为之）：
+ *  1. Pine 端点模式里 src[j] 用的是绝对索引，长图上会错位；
+ *     这里改为「最近 radius 根」，且分母按实际可用的权重归一（起点不塌陷）。
+ *  2. maeLen 默认 100 而不是 499：本站每品种只有约 400 根日线，
+ *     maeLen=499 会让整条包络没有有效值（永远画不出来）。
+ *     想更贴近原脚本可在调用处传 maeLen: 499（需先加长取数天数）。
+ *  3. radius 默认 4h：h=8 时 d=32 的权重已衰减到 3.4e-4，截断无可见误差。
+ *
+ * 只做端点模式、不提供重绘模式：重绘要对窗口内每根 bar 重算 O(radius^2)
+ * 次，41 张卡片会明显卡顿；且历史值会随新数据改写，不适合网格横向对比。
+ */
+function nwBand(closes, opts) {
+  const o = opts || {};
+  const len = closes.length;
+  const h = Math.max(0.5, Number(o.h) > 0 ? Number(o.h) : 8);
+  const mult = Number.isFinite(Number(o.mult)) ? Number(o.mult) : 3;
+  const radius = Math.max(1, Math.floor(o.radius > 0 ? o.radius : Math.ceil(4 * h)));
+  const maeLen = Math.max(2, Math.floor(o.maeLen > 0 ? Math.min(o.maeLen, len) : Math.min(100, len)));
+
+  const center = new Float64Array(len);
+  const up = new Float64Array(len);
+  const low = new Float64Array(len);
+  const mae = new Float64Array(len);
+  if (!len) { up.fill(NaN); low.fill(NaN); mae.fill(NaN); return { center, up, low, mae }; }
+
+  // 核权重查表，偏移 0..radius
+  const w = new Float64Array(radius + 1);
+  for (let d = 0; d <= radius; d++) w[d] = nwGauss(d, h);
+
+  for (let i = 0; i < len; i++) {
+    let sum = 0;
+    let sw = 0;
+    const from = Math.max(0, i - radius);
+    for (let j = i; j >= from; j--) {
+      const k = w[i - j];
+      sum += closes[j] * k;
+      sw += k;
+    }
+    center[i] = sw > 0 ? sum / sw : closes[i];
+  }
+
+  // 残差 -> 平均绝对误差
+  // 前 maeLen-1 根用「扩展窗口」平均（分母 = i+1），满窗后转为严格滚动。
+  // 严格 SMA 口径会让开头 maeLen 根全部为 NaN：本站每品种仅约 400 根日线，
+  // 那等于丢掉四分之一历史、默认 130 根视图里包络几乎不出现，故有意放宽。
+  let acc = 0;
+  for (let i = 0; i < len; i++) {
+    acc += Math.abs(closes[i] - center[i]);
+    if (i >= maeLen) acc -= Math.abs(closes[i - maeLen] - center[i - maeLen]);
+    mae[i] = acc / Math.min(i + 1, maeLen);
+  }
+
+  for (let i = 0; i < len; i++) {
+    if (Number.isNaN(mae[i])) { up[i] = NaN; low[i] = NaN; continue; }
+    up[i] = center[i] + mae[i] * mult;
+    low[i] = center[i] - mae[i] * mult;
+  }
+  return { center, up, low, mae };
+}
+
+/**
+ * 带外突破信号（收盘价穿越上下轨的那一根）。
+ *   bull[i] = 1  收盘由轨内向上突破上轨（强势外扩）
+ *   bear[i] = 1  收盘由轨内向下跌破下轨（弱势外扩）
+ * 注意 Pine 原版把 ▼ 画在「跌破下轨」上（延续信号），
+ * 这里按直觉改成 ▲ 标上破 / ▼ 标下破，方向与颜色一致。
+ */
+function nwSignals(closes, band) {
+  const len = closes.length;
+  const bull = new Uint8Array(len);
+  const bear = new Uint8Array(len);
+  if (!band) return { bull, bear };
+  for (let i = 1; i < len; i++) {
+    const u = band.up[i];
+    const d = band.low[i];
+    if (Number.isNaN(u) || Number.isNaN(d)) continue;
+    if (closes[i - 1] <= u && closes[i] > u) bull[i] = 1;
+    if (closes[i - 1] >= d && closes[i] < d) bear[i] = 1;
+  }
+  return { bull, bear };
+}
+
+/** NW 默认参数，app.js 与 assess() 共用，避免两处口径不一致。 */
+const NW_DEFAULTS = { h: 8, mult: 3, maeLen: 100 };
+
 /** MACD：快慢 EMA 之差 + 信号线。 */
 function macdCalc(closes, fast, slow, sig) {
   const ef = ema(closes, fast);
@@ -407,7 +514,7 @@ export function decimalsFor(price) {
  * · MACD 柱        1.0   动量方向
  * · RSI 偏离 50    1.0   连续强度（-1..1）
  * · TD9 完成       1.0   衰竭提示（买入9 +1 / 卖出9 -1）
- * · BOLL 带内位置  0.5   -1..1
+ * · NW 带内位置    0.5   -1..1（原用 BOLL，主图换 NW 后同步）
  */
 export function assess(bars, opts) {
   const o = opts || {};
@@ -418,7 +525,7 @@ export function assess(bars, opts) {
   const i = c.length - 1;
 
   const ma = twoPoleMA(c, period, method);
-  const bo = bollinger(c, 20, 2);
+  const nw = nwBand(c, NW_DEFAULTS);
   const mc = macdCalc(c, 12, 26, 9);
   const rs = rsiCalc(c, 14);
   const td = tdSetup(c);
@@ -460,14 +567,14 @@ export function assess(bars, opts) {
   parts.td = bv >= 9 ? 1 : sv >= 9 ? -1 : 0;
   sum += parts.td; wsum += 1;
 
-  // 位置：BOLL 通道内相对位置，权重减半
-  const up = bo.up[i];
-  const lo = bo.low[i];
+  // 位置：NW 包络内相对位置，权重减半
+  const up = nw.up[i];
+  const lo = nw.low[i];
   if (!Number.isNaN(up) && !Number.isNaN(lo) && up > lo) {
-    parts.boll = Math.max(-1, Math.min(1, (2 * (c[i] - lo)) / (up - lo) - 1));
-    sum += parts.boll * 0.5; wsum += 0.5;
+    parts.band = Math.max(-1, Math.min(1, (2 * (c[i] - lo)) / (up - lo) - 1));
+    sum += parts.band * 0.5; wsum += 0.5;
   } else {
-    parts.boll = 0;
+    parts.band = 0;
   }
 
   const score = wsum > 0 ? Math.round((sum / wsum) * 100) : 0;
@@ -489,5 +596,6 @@ export {
   ema, sma, cascadeEMA, smaOfSma, twoPoleMA,
   wma, hma, dema, tema, zlema, kama, jma,
   bollinger, macdCalc, rsiCalc, tdSetup,
+  nwGauss, nwBand, nwSignals, NW_DEFAULTS,
   resample,
 };
