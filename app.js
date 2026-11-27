@@ -683,7 +683,17 @@ function updateFooter(shown) {
   if (!f) return;
   const m = state.manifest || {};
   const total = (m.instruments || []).filter((i) => i.status === 'ok').length;
-  const n = shown == null ? total : shown;
+  let n = shown;
+  if (n == null) {
+    // 未显式传入时按当前可见卡片统计，避免筛选后仍显示全部品种数。
+    const grid = document.getElementById('grid');
+    n = 0;
+    if (grid) {
+      for (const el of grid.children) {
+        if (el._inst && el.style.display !== 'none') n++;
+      }
+    }
+  }
   const keys = ['ma', 'nw', 'macd', 'rsi', 'td'];
   const names = ['均线', 'NW带(' + state.nwH + '×' + state.nwMult + ')', 'MACD', 'RSI', 'TD9'];
   const inds = names.filter((_, idx) => state.ind[keys[idx]]);
