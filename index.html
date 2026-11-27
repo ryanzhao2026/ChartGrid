@@ -44,13 +44,21 @@
       </select>
     </label>
 
+    <label>NW 带宽
+      <input id="nw-h" type="number" min="1" max="50" step="1" value="8" title="高斯核带宽（单位：根）。越大越平滑越滞后">
+    </label>
+
+    <label>NW 倍数
+      <input id="nw-mult" type="number" min="0.5" max="10" step="0.5" value="3" title="带宽 = NW倍数 × 中心线残差平均绝对值">
+    </label>
+
     <label>显示根数
       <input id="bars" type="number" min="20" max="500" step="10" value="130">
     </label>
 
     <div class="inds">
       <label class="chk"><input type="checkbox" id="ind-ma" checked>均线</label>
-      <label class="chk"><input type="checkbox" id="ind-boll" checked>BOLL</label>
+      <label class="chk"><input type="checkbox" id="ind-nw" checked title="Nadaraya-Watson 包络（高斯核中心线 ± NW倍数×MAE）">NW带</label>
       <label class="chk"><input type="checkbox" id="ind-macd" checked>MACD</label>
       <label class="chk"><input type="checkbox" id="ind-rsi">RSI</label>
       <label class="chk"><input type="checkbox" id="ind-td" checked title="DeMark TD Setup 9（close vs close[4] 连续计数达 9）">TD9</label>
